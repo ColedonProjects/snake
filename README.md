@@ -27,7 +27,7 @@ A modern implementation of the classic Snake game built with TypeScript and Pixi
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/snake.git
+git clone https://github.com/ColedonProjects/snake.git
 cd snake
 ```
 
@@ -102,7 +102,7 @@ snake/
 
 - Modern browsers with ES6+ support
 - Chrome 60+, Firefox 55+, Safari 12+, Edge 79+
-- Mobile browsers on iOS and Android
+- [Coming Soon] Mobile browsers on iOS and Android 
 
 ## License
 
