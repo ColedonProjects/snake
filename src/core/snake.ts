@@ -29,7 +29,7 @@ export class Snake
     this.direction = 'right';
     this.moveTimer = 0;
 
-    // Create initial snake body (head at highest x)
+    // Create initial snake body starting from left
     for ( let i = INITIAL_LENGTH - 1; i >= 0; i-- )
     {
       this.body.push( { x: i * GRID_SIZE, y: 0 } );
@@ -40,7 +40,7 @@ export class Snake
 
   public update ( delta: number ): void
   {
-    // Convert delta to seconds (assuming 60 FPS)
+    // Track movement timing
     this.moveTimer += delta / 60;
     if ( this.moveTimer >= MOVE_INTERVAL )
     {
@@ -51,7 +51,7 @@ export class Snake
 
   public setDirection ( direction: Direction ): void
   {
-    // Prevent 180-degree turns
+    // Don't allow reversing direction
     const opposites = {
       up: 'down',
       down: 'up',
@@ -61,7 +61,7 @@ export class Snake
 
     if ( opposites[ direction ] !== this.direction && direction !== this.direction )
     {
-      console.log( '[Snake] Direction changed from', this.direction, 'to', direction );
+      // Direction change logged for debugging
       this.direction = direction;
     }
   }
@@ -70,14 +70,14 @@ export class Snake
   {
     const tail = this.body[ this.body.length - 1 ];
     this.body.push( { ...tail } );
-    console.log( '[Snake] Grew! New length:', this.body.length );
+    // Snake grows by one segment
   }
 
   public checkFoodCollision ( foodPosition: Position ): boolean
   {
     const head = this.body[ 0 ];
     const collision = head.x === foodPosition.x && head.y === foodPosition.y;
-    if ( collision ) console.log( '[Snake] Food collision detected at', head );
+    // Check if head touches food position
     return collision;
   }
 
@@ -90,7 +90,7 @@ export class Snake
       head.y < 0 ||
       head.y >= 600
     );
-    if ( hitWall ) console.log( '[Snake] Wall collision detected at', head );
+    // Return whether snake hit the boundary
     return hitWall;
   }
 
@@ -100,7 +100,7 @@ export class Snake
     const selfHit = this.body.slice( 1 ).some( segment =>
       segment.x === head.x && segment.y === head.y
     );
-    if ( selfHit ) console.log( '[Snake] Self collision detected at', head );
+    // Return whether snake collided with itself
     return selfHit;
   }
 
@@ -120,7 +120,7 @@ export class Snake
 
   private move (): void
   {
-    // Apply buffered direction change if present
+    // Apply any queued direction change
     if ( this.nextDirection )
     {
       const opposites = {
@@ -136,8 +136,8 @@ export class Snake
       this.nextDirection = null;
     }
     const head = { ...this.body[ 0 ] };
-    console.log( '[Snake] Moving. Current head:', head, 'direction:', this.direction );
-    // Update head position based on direction
+
+    // Move head in current direction
     switch ( this.direction )
     {
       case 'up':
@@ -154,28 +154,27 @@ export class Snake
         break;
     }
 
-    // Add new head and remove tail
+    // Move snake forward by adding new head and removing tail
     this.body.unshift( head );
     this.body.pop();
 
     this.draw();
-    console.log( '[Snake] New head position:', head, 'Body:', this.body );
   }
 
   private draw (): void
   {
     this.graphics.clear();
 
-    // Draw each segment with improved snake-like appearance
+    // Render each body segment
     this.body.forEach( ( segment, index ) =>
     {
       if ( index === 0 )
       {
-        // Draw snake head with eyes
+        // Snake head with directional eyes
         this.drawSnakeHead( segment );
       } else
       {
-        // Draw body segment
+        // Regular body segment
         this.drawBodySegment( segment, index );
       }
     } );
@@ -187,7 +186,7 @@ export class Snake
     const centerX = position.x + GRID_SIZE / 2;
     const centerY = position.y + GRID_SIZE / 2;
 
-    // Draw head (slightly larger rounded rectangle)
+    // Main head shape
     this.graphics.beginFill( this.color );
     this.graphics.drawRoundedRect(
       centerX - headSize / 2,

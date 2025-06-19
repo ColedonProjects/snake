@@ -31,8 +31,8 @@
 
       .game-header {
         display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        grid-template-rows: auto auto;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: auto;
         gap: 20px;
         align-items: center;
         width: 100%;
@@ -41,6 +41,7 @@
         background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
         border-radius: 10px;
         border: 2px solid #333;
+        position: relative;
       }
 
       .score-info {
@@ -50,15 +51,73 @@
         justify-self: start;
       }
 
+      .empty-section {
+        justify-self: end;
+      }
+
+      .stats-info {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        justify-self: center;
+        grid-column: 2;
+      }
+
+      .stats-item {
+        text-align: center;
+      }
+
+      .stats-label {
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 3px;
+      }
+
+      .stats-value {
+        font-size: 16px;
+        font-weight: bold;
+        color: #00aaff;
+      }
+
+      .high-score-value {
+        color: #ffaa00;
+      }
+
+      .score-item {
+        text-align: center;
+      }
+
+      .score-label {
+        font-size: 14px;
+        color: #888;
+        margin-bottom: 5px;
+      }
+
+      .score-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #00ff00;
+      }
+
+      .level-value {
+        color: #ffff00;
+      }
+
       .game-controls {
         display: flex;
         flex-direction: row;
         align-items: center;
         gap: 12px;
-        justify-self: center;
+        justify-content: center;
+        width: 100%;
+        margin-top: 20px;
+        padding: 15px;
+        background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+        border-radius: 10px;
+        border: 2px solid #333;
       }
 
-      .game-status {
+      .game-status,.start-button {
         padding: 8px 16px;
         background: #333;
         border: 1px solid #555;
@@ -82,17 +141,12 @@
       }
 
       .start-button {
-        padding: 10px 25px;
         background: linear-gradient(135deg, #00aa00, #008800);
         border: 2px solid #00cc00;
-        border-radius: 8px;
         color: #fff;
-        font-size: 14px;
-        font-weight: bold;
         cursor: pointer;
         transition: all 0.2s;
         user-select: none;
-        min-width: 140px;
       }
 
       .start-button:hover {
@@ -113,34 +167,7 @@
         box-shadow: none;
       }
 
-      .theme-controls {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        justify-self: end;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-      }
 
-      .score-item {
-        text-align: center;
-      }
-
-      .score-label {
-        font-size: 14px;
-        color: #888;
-        margin-bottom: 5px;
-      }
-
-      .score-value {
-        font-size: 24px;
-        font-weight: bold;
-        color: #00ff00;
-      }
-
-      .level-value {
-        color: #ffff00;
-      }
 
       .control-button {
         padding: 8px 15px;
@@ -165,6 +192,169 @@
         transform: translateY(1px);
       }
 
+      /* Popover Icon Buttons */
+      .icon-button {
+        position: absolute;
+        top: 15px;
+        padding: 8px;
+        background: #333;
+        border: 1px solid #555;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+        user-select: none;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+      }
+
+      .icon-button:hover {
+        background: #444;
+        border-color: #666;
+        transform: scale(1.1);
+      }
+
+      .settings-icon {
+        right: 105px;
+      }
+
+      .achievements-icon {
+        right: 60px;
+      }
+
+      .instructions-icon {
+        right: 15px;
+      }
+
+      /* Popover Styles */
+      .popover {
+        position: absolute;
+        top: 50px;
+        right: 15px;
+        background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+        border: 2px solid #333;
+        border-radius: 10px;
+        padding: 20px;
+        max-width: 400px;
+        z-index: 1000;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+      }
+
+      .popover.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .popover h3 {
+        margin: 0 0 15px 0;
+        color: #ffaa00;
+        font-size: 18px;
+      }
+
+      .settings-popover {
+        right: 105px;
+      }
+
+      .achievements-popover {
+        right: 60px;
+      }
+
+      .instructions-popover {
+        right: 15px;
+      }
+
+      .achievements-list {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+
+      .achievement-badge {
+        padding: 4px 8px;
+        background: #444;
+        border: 1px solid #666;
+        border-radius: 12px;
+        font-size: 11px;
+        color: #ccc;
+        transition: all 0.3s ease;
+      }
+
+      .achievement-badge.unlocked {
+        background: #4a9;
+        color: #fff;
+        border-color: #5ba;
+        box-shadow: 0 0 8px rgba(68, 187, 153, 0.4);
+        animation: achievement-glow 0.5s ease-in-out;
+      }
+
+      @keyframes achievement-glow {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+
+      .settings-content {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+      }
+
+      .setting-item span {
+        color: #ccc;
+      }
+
+      .setting-item .control-button {
+        margin: 0;
+        min-width: 80px;
+      }
+
+      .instructions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        font-size: 13px;
+      }
+
+      .instruction-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .instruction-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .key {
+        background: #333;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        border: 1px solid #555;
+        min-width: 20px;
+        text-align: center;
+      }
+
       #game-container {
         position: relative;
         border: 3px solid #333;
@@ -179,84 +369,23 @@
         height: auto;
       }
 
-      .game-footer {
+      /* Backdrop for popovers */
+      .popover-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
         width: 100%;
-        margin-top: 20px;
-        padding: 15px 20px;
-        background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
-        border-radius: 10px;
-        border: 2px solid #333;
-      }
-
-      .achievements-section {
-        margin-bottom: 15px;
-      }
-
-      .achievements-title {
-        font-size: 16px;
-        margin-bottom: 10px;
-        color: #ffaa00;
-      }
-
-      .achievements-list {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      .achievement-badge {
-        padding: 5px 10px;
-        background: #444;
-        border: 1px solid #666;
-        border-radius: 15px;
-        font-size: 12px;
-        color: #ccc;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 999;
+        opacity: 0;
+        visibility: hidden;
         transition: all 0.3s ease;
       }
 
-      .achievement-badge.unlocked {
-        background: #4a9;
-        color: #fff;
-        border-color: #5ba;
-        box-shadow: 0 0 10px rgba(68, 187, 153, 0.4);
-        animation: achievement-glow 0.5s ease-in-out;
-      }
-
-      @keyframes achievement-glow {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-        100% { transform: scale(1); }
-      }
-
-      .instructions {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 15px;
-        font-size: 14px;
-        color: #888;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-
-      .instruction-group {
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-      }
-
-      .instruction-item {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        white-space: nowrap;
-      }
-
-      .key {
-        background: #333;
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-size: 12px;
-        border: 1px solid #555;
+      .popover-backdrop.active {
+        opacity: 1;
+        visibility: visible;
       }
 
       /* Responsive Design */
@@ -267,7 +396,7 @@
         
         .game-header {
           grid-template-columns: 1fr;
-          grid-template-rows: auto auto auto;
+          grid-template-rows: auto auto;
           text-align: center;
           gap: 15px;
         }
@@ -277,9 +406,47 @@
           gap: 20px;
         }
 
-        .theme-controls {
-          justify-self: center;
-          justify-content: center;
+        .stats-info {
+          grid-column: 1;
+          grid-row: 2;
+          gap: 15px;
+        }
+
+        .empty-section {
+          display: none;
+        }
+
+        .icon-button {
+          top: 10px;
+        }
+
+        .settings-icon {
+          right: 90px;
+        }
+
+        .achievements-icon {
+          right: 50px;
+        }
+
+        .instructions-icon {
+          right: 10px;
+        }
+
+        .popover {
+          right: 10px;
+          max-width: 300px;
+        }
+
+        .settings-popover {
+          right: 90px;
+        }
+
+        .achievements-popover {
+          right: 50px;
+        }
+
+        .instructions-popover {
+          right: 10px;
         }
 
         #game-container {
@@ -298,8 +465,7 @@
           padding: 10px;
         }
 
-        .game-header,
-        .game-footer {
+        .game-header {
           padding: 15px;
         }
 
@@ -322,18 +488,27 @@
           min-width: 120px;
         }
 
-        .theme-controls {
-          gap: 8px;
+        .game-controls {
+          margin-top: 15px;
+          padding: 12px;
         }
 
-        .instructions {
-          flex-direction: column;
+        .stats-info {
+          gap: 12px;
+        }
+
+        .stats-value {
+          font-size: 14px;
+        }
+
+        .popover {
+          max-width: 280px;
+          padding: 15px;
+        }
+
+        .instructions-grid {
+          grid-template-columns: 1fr;
           gap: 10px;
-        }
-
-        .instruction-group {
-          justify-content: center;
-          gap: 15px;
         }
       }
 
@@ -343,30 +518,56 @@
           gap: 10px;
         }
 
-        .theme-controls {
+        .game-controls {
+          flex-direction: column;
+          gap: 12px;
+          margin-top: 10px;
+          padding: 12px;
+        }
+
+        .stats-info {
           flex-direction: column;
           gap: 8px;
-        }
-
-        .achievements-list {
-          justify-content: center;
-        }
-
-        .instruction-group {
-          gap: 10px;
         }
 
         .game-header {
           gap: 12px;
         }
+
+        .settings-icon {
+          right: 75px;
+        }
+
+        .achievements-icon {
+          right: 40px;
+        }
+
+        .settings-popover {
+          right: 75px;
+        }
+
+        .achievements-popover {
+          right: 40px;
+        }
       }
     </style>
-    <script type="module" crossorigin src="/assets/index-C2OV9_B-.js"></script>
+    <script type="module" crossorigin src="/assets/index-CoLURpk1.js"></script>
   </head>
   <body>
     <div class="game-wrapper">
       <!-- Game Header with Score, Controls, and Status -->
       <div class="game-header">
+        <!-- Icon Buttons -->
+        <div class="icon-button settings-icon" id="settings-trigger" title="Settings">
+          ⚙️
+        </div>
+        <div class="icon-button achievements-icon" id="achievements-trigger" title="Achievements">
+          🏆
+        </div>
+        <div class="icon-button instructions-icon" id="instructions-trigger" title="Controls">
+          ❓
+        </div>
+
         <!-- Score Section -->
         <div class="score-info">
           <div class="score-item">
@@ -379,68 +580,105 @@
           </div>
         </div>
 
-        <!-- Game Controls (Center) -->
-        <div class="game-controls">
-          <div class="game-status" id="game-status">Ready to Play</div>
-          <button class="start-button" id="start-button">Start Game</button>
+        <!-- Statistics Section  -->
+        <div class="stats-info">
+          <div class="stats-item">
+            <div class="stats-label">Games Played</div>
+            <div id="games-played" class="stats-value">0</div>
+          </div>
+          <div class="stats-item">
+            <div class="stats-label">High Score</div>
+            <div id="high-score" class="stats-value high-score-value">0</div>
+          </div>
+          <div class="stats-item">
+            <div class="stats-label">Average Score</div>
+            <div id="average-score" class="stats-value">0</div>
+          </div>
         </div>
 
-        <!-- Theme Controls (Right) -->
-        <div class="theme-controls">
-          <div class="control-button" id="theme-button">Theme: Dark</div>
-          <div class="control-button" id="skin-button">Skin: Classic</div>
-        </div>
+        
       </div>
 
       <!-- Game Canvas -->
       <div id="game-container"></div>
 
-      <!-- Game Footer with Achievements and Instructions -->
-      <div class="game-footer">
-        <div class="achievements-section">
-          <div class="achievements-title">🏆 Achievements</div>
-          <div class="achievements-list" id="achievements-list">
-            <div class="achievement-badge" data-achievement="First Food">First Food</div>
-            <div class="achievement-badge" data-achievement="Score 100">Score 100</div>
-            <div class="achievement-badge" data-achievement="Score 500">Score 500</div>
-            <div class="achievement-badge" data-achievement="Level 5">Level 5</div>
-            <div class="achievement-badge" data-achievement="Combo Master">Combo Master</div>
-            <div class="achievement-badge" data-achievement="Power User">Power User</div>
+      <!-- Game Controls (Below Canvas) -->
+      <div class="game-controls">
+        <div class="game-status" id="game-status">Ready to Play</div>
+        <button class="start-button" id="start-button">Start Game</button>
+      </div>
+
+      <!-- Popover Backdrop -->
+      <div class="popover-backdrop" id="popover-backdrop"></div>
+
+      <!-- Settings Popover -->
+      <div class="popover settings-popover" id="settings-popover">
+        <h3>⚙️ Settings</h3>
+        <div class="settings-content">
+          <div class="setting-item">
+            <span>Theme:</span>
+            <div class="control-button" id="theme-button">Dark</div>
+          </div>
+          <div class="setting-item">
+            <span>Snake Skin:</span>
+            <div class="control-button" id="skin-button">Classic</div>
           </div>
         </div>
-        
-        <div class="instructions">
+      </div>
+
+      <!-- Achievements Popover -->
+      <div class="popover achievements-popover" id="achievements-popover">
+        <h3>🏆 Achievements</h3>
+        <div class="achievements-list" id="achievements-list">
+          <div class="achievement-badge" data-achievement="First Food">First Food</div>
+          <div class="achievement-badge" data-achievement="Score 100">Score 100</div>
+          <div class="achievement-badge" data-achievement="Score 500">Score 500</div>
+          <div class="achievement-badge" data-achievement="Level 5">Level 5</div>
+          <div class="achievement-badge" data-achievement="Combo Master">Combo Master</div>
+          <div class="achievement-badge" data-achievement="Power User">Power User</div>
+        </div>
+      </div>
+
+      <!-- Instructions Popover -->
+      <div class="popover instructions-popover" id="instructions-popover">
+        <h3>❓ Game Controls</h3>
+        <div class="instructions-grid">
           <div class="instruction-group">
             <div class="instruction-item">
-              <span>Move:</span>
-              <span class="key">↑</span>
-              <span class="key">↓</span>
-              <span class="key">←</span>
-              <span class="key">→</span>
+              <span>Move</span>
+              <div>
+                <span class="key">↑</span>
+                <span class="key">↓</span>
+                <span class="key">←</span>
+                <span class="key">→</span>
+              </div>
             </div>
             <div class="instruction-item">
-              <span>Pause:</span>
+              <span>Pause</span>
               <span class="key">Space</span>
             </div>
             <div class="instruction-item">
-              <span>Restart:</span>
+              <span>Restart</span>
               <span class="key">Esc</span>
             </div>
           </div>
           <div class="instruction-group">
             <div class="instruction-item">
-              <span>Theme:</span>
+              <span>Settings</span>
+              <span class="key">⚙️</span>
+            </div>
+            <div class="instruction-item">
+              <span>Theme</span>
               <span class="key">T</span>
             </div>
             <div class="instruction-item">
-              <span>Skin:</span>
+              <span>Skin</span>
               <span class="key">S</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-
+
   </body>
 </html> 

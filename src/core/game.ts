@@ -10,7 +10,7 @@ import { ThemeManager, Theme } from '../../srcui/theme-manager';
 import { SkinManager, SnakeSkin } from '../../srcui/skin-manager';
 import { AchievementSystem } from '../../srcui/achievement-system';
 
-// External UI interface
+// Interface for communicating with HTML UI elements
 interface ExternalUI
 {
   updateScore ( score: number ): void;
@@ -23,7 +23,7 @@ interface ExternalUI
   gameCompleted ( finalScore: number ): void;
 }
 
-// Simple game over overlay for canvas
+// Game over screen displayed on the canvas
 class GameOverOverlay
 {
   public container: Container;
@@ -41,14 +41,14 @@ class GameOverOverlay
 
   private createOverlay (): void
   {
-    // Semi-transparent background
+    // Dark background overlay
     this.graphics = new Graphics();
     this.graphics.beginFill( 0x000000, 0.8 );
     this.graphics.drawRect( 0, 0, 800, 600 );
     this.graphics.endFill();
     this.container.addChild( this.graphics );
 
-    // Game Over text
+    // Main title text
     const titleStyle = new TextStyle( {
       fontFamily: 'Arial',
       fontSize: 48,
@@ -61,7 +61,7 @@ class GameOverOverlay
     this.titleText.position.set( 400, 250 );
     this.container.addChild( this.titleText );
 
-    // Restart instruction
+    // Instructions for restarting
     const restartStyle = new TextStyle( {
       fontFamily: 'Arial',
       fontSize: 24,
@@ -79,7 +79,7 @@ class GameOverOverlay
     this.container.visible = true;
     this.onRestart = onRestart;
 
-    // Listen for spacebar
+    // Wait for spacebar press to restart
     const spaceHandler = ( event: KeyboardEvent ) =>
     {
       if ( event.code === 'Space' )
@@ -114,18 +114,18 @@ export class Game
   private particles: ParticleSystem;
   private powerUpTimer: number = 0;
   private powerUpActive: boolean = false;
-  private powerUpDuration: number = 300; // frames (5 seconds at 60fps)
-  private powerUpChance: number = 0.01; // chance per frame to spawn
+  private powerUpDuration: number = 300; // 5 seconds at 60fps
+  private powerUpChance: number = 0.01; // probability per frame
   private comboPopup: ComboPopup;
-  private comboCount: number = 0; // foods eaten in window
-  private comboTimer: number = 0; // frames left in window
+  private comboCount: number = 0; // food eaten in combo window
+  private comboTimer: number = 0; // time remaining for combo
   private comboWindow: number = 1800; // 30 seconds at 60fps
   private currentSkin: SnakeSkin;
   private achievements: AchievementSystem;
 
   constructor ( app: Application, externalUI: ExternalUI )
   {
-    console.log( '[Game] Constructor starting...' );
+    // Initialize game components
     this.app = app;
     this.externalUI = externalUI;
     this.gameContainer = new Container();

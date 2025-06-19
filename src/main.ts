@@ -2,7 +2,7 @@ import { Application } from 'pixi.js';
 import { Game } from './core/game';
 import { CookieManager } from './utils/cookie-manager';
 
-// Create external UI manager
+// Handles all UI elements outside the game canvas
 class ExternalUI
 {
   private scoreElement: HTMLElement;
@@ -17,7 +17,7 @@ class ExternalUI
   private averageScoreElement: HTMLElement;
   private game: Game | null = null;
 
-  // Popover elements
+  // Elements for the popup dialogs
   private settingsTrigger: HTMLElement;
   private achievementsTrigger: HTMLElement;
   private instructionsTrigger: HTMLElement;
@@ -39,7 +39,7 @@ class ExternalUI
     this.highScoreElement = document.getElementById( 'high-score' )!;
     this.averageScoreElement = document.getElementById( 'average-score' )!;
 
-    // Popover elements
+    // Get popup dialog elements
     this.settingsTrigger = document.getElementById( 'settings-trigger' )!;
     this.achievementsTrigger = document.getElementById( 'achievements-trigger' )!;
     this.instructionsTrigger = document.getElementById( 'instructions-trigger' )!;
@@ -48,65 +48,51 @@ class ExternalUI
     this.instructionsPopover = document.getElementById( 'instructions-popover' )!;
     this.popoverBackdrop = document.getElementById( 'popover-backdrop' )!;
 
-    console.log( '[ExternalUI] Elements found:', {
-      score: !!this.scoreElement,
-      level: !!this.levelElement,
-      theme: !!this.themeButton,
-      skin: !!this.skinButton,
-      achievements: !!this.achievementsList,
-      start: !!this.startButton,
-      status: !!this.gameStatusElement,
-      gamesPlayed: !!this.gamesPlayedElement,
-      highScore: !!this.highScoreElement,
-      averageScore: !!this.averageScoreElement,
-      settingsTrigger: !!this.settingsTrigger,
-      achievementsTrigger: !!this.achievementsTrigger,
-      instructionsTrigger: !!this.instructionsTrigger
-    } );
+    // Verify all UI elements were found successfully
 
-    // Set up popover functionality
+    // Initialize popup dialog functionality
     this.setupPopovers();
 
-    // Load and display initial statistics
+    // Load and display saved game statistics
     this.updateStatistics();
 
-    // Show welcome message for first-time players
+    // Log message for new players
     if ( CookieManager.isFirstTime() )
     {
-      console.log( '[ExternalUI] Welcome new player!' );
+      // First-time player detected
     }
   }
 
   private setupPopovers (): void
   {
-    // Settings popover
+    // Handle settings dialog
     this.settingsTrigger.addEventListener( 'click', ( e ) =>
     {
       e.stopPropagation();
       this.togglePopover( 'settings' );
     } );
 
-    // Achievements popover
+    // Handle achievements dialog
     this.achievementsTrigger.addEventListener( 'click', ( e ) =>
     {
       e.stopPropagation();
       this.togglePopover( 'achievements' );
     } );
 
-    // Instructions popover
+    // Handle instructions dialog
     this.instructionsTrigger.addEventListener( 'click', ( e ) =>
     {
       e.stopPropagation();
       this.togglePopover( 'instructions' );
     } );
 
-    // Backdrop and outside clicks
+    // Close dialog when clicking backdrop
     this.popoverBackdrop.addEventListener( 'click', () =>
     {
       this.closeAllPopovers();
     } );
 
-    // Close popovers when clicking outside
+    // Also close when clicking outside dialogs
     document.addEventListener( 'click', ( e ) =>
     {
       const target = e.target as HTMLElement;
@@ -116,7 +102,7 @@ class ExternalUI
       }
     } );
 
-    // Close popovers on escape key
+    // Close dialogs with Escape key
     document.addEventListener( 'keydown', ( e ) =>
     {
       if ( e.key === 'Escape' )
@@ -132,10 +118,10 @@ class ExternalUI
     const isAchievementsOpen = this.achievementsPopover.classList.contains( 'active' );
     const isInstructionsOpen = this.instructionsPopover.classList.contains( 'active' );
 
-    // Close all popovers first
+    // Close any open dialogs first
     this.closeAllPopovers();
 
-    // Open the requested popover if it wasn't already open
+    // Show the requested dialog if it wasn't already visible
     if ( type === 'settings' && !isSettingsOpen )
     {
       this.settingsPopover.classList.add( 'active' );
@@ -161,52 +147,38 @@ class ExternalUI
 
   setGame ( game: Game ): void
   {
-    console.log( '[ExternalUI] Setting game reference' );
     this.game = game;
     this.setupEventListeners();
   }
 
   private setupEventListeners (): void
   {
-    console.log( '[ExternalUI] Setting up event listeners' );
 
     // Start button
     this.startButton.addEventListener( 'click', () =>
     {
-      console.log( '[ExternalUI] Start button clicked' );
       if ( this.game )
       {
         this.game.start();
         this.startButton.textContent = 'Restart Game';
-      } else
-      {
-        console.warn( '[ExternalUI] Game reference not set!' );
       }
     } );
 
     // Theme button
     this.themeButton.addEventListener( 'click', () =>
     {
-      console.log( '[ExternalUI] Theme button clicked' );
       if ( this.game )
       {
         this.game.nextTheme();
-      } else
-      {
-        console.warn( '[ExternalUI] Game reference not set!' );
       }
     } );
 
     // Skin button
     this.skinButton.addEventListener( 'click', () =>
     {
-      console.log( '[ExternalUI] Skin button clicked' );
       if ( this.game )
       {
         this.game.nextSkin();
-      } else
-      {
-        console.warn( '[ExternalUI] Game reference not set!' );
       }
     } );
   }
@@ -219,7 +191,6 @@ class ExternalUI
     if ( CookieManager.updateHighScore( score ) )
     {
       this.updateStatistics();
-      console.log( '[ExternalUI] New high score achieved!', score );
     }
   }
 
@@ -264,11 +235,8 @@ class ExternalUI
   gameCompleted ( finalScore: number ): void
   {
     // Record the completed game in cookies
-    const newStats = CookieManager.recordGame( finalScore );
+    CookieManager.recordGame( finalScore );
     this.updateStatistics();
-
-    console.log( '[ExternalUI] Game completed. Final score:', finalScore );
-    console.log( '[ExternalUI] Updated stats:', newStats );
   }
 
   private updateStatistics (): void
@@ -287,7 +255,7 @@ class ExternalUI
       if ( badge.getAttribute( 'data-achievement' ) === achievementName )
       {
         badge.classList.add( 'unlocked' );
-        console.log( `[ExternalUI] Achievement unlocked: ${ achievementName }` );
+        // Achievement unlocked and displayed
       }
     } );
   }
@@ -309,7 +277,6 @@ class ExternalUI
 // Initialize everything when DOM is ready
 function initializeGame ()
 {
-  console.log( '[Main] Initializing game...' );
 
   // Create the Pixi application
   const app = new Application( {
@@ -334,8 +301,6 @@ function initializeGame ()
   // Create the game but don't start it yet
   const game = new Game( app, externalUI );
   externalUI.setGame( game );
-
-  console.log( '[Main] Game initialization complete' );
 }
 
 // Wait for DOM to be ready
