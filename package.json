@@ -1,23 +1,51 @@
 {
-  "name": "snake",
+  "name": "@coledonprojects/snake-game",
   "version": "1.0.0",
-  "description": "A modern implementation of the classic Snake game with advanced features",
+  "description": "A modern Snake game library that can be embedded in any web application with a secret key sequence easter egg",
   "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:lib": "tsc && vite build --mode library",
     "preview": "vite preview",
     "lint": "eslint src --ext ts",
-    "format": "prettier --write \"src/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepublishOnly": "npm run build:lib"
   },
   "keywords": [
     "game",
     "snake",
+    "easter-egg",
+    "library",
     "pixi.js",
-    "typescript"
+    "typescript",
+    "konami-code",
+    "hidden-game",
+    "web-component"
   ],
-  "author": "",
+  "author": "ColedonProjects",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ColedonProjects/snake.git"
+  },
+  "homepage": "https://github.com/ColedonProjects/snake#readme",
+  "bugs": {
+    "url": "https://github.com/ColedonProjects/snake/issues"
+  },
   "dependencies": {
     "pixi.js": "^7.4.0"
   },

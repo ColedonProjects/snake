@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Game Library Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 800px;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 1.2em;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+
+    .demo-section {
+      margin: 30px 0;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .demo-section h3 {
+      color: #4ecdc4;
+      margin-bottom: 15px;
+    }
+
+    .key-sequence {
+      display: inline-flex;
+      gap: 5px;
+      margin: 10px;
+      font-family: monospace;
+    }
+
+    .key {
+      background: #333;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 5px;
+      font-size: 12px;
+      border: 1px solid #555;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .arrow-key {
+      background: #4ecdc4;
+      color: #333;
+    }
+
+    .status {
+      margin: 20px 0;
+      padding: 10px;
+      background: rgba(76, 175, 80, 0.2);
+      border-left: 4px solid #4caf50;
+      border-radius: 5px;
+    }
+
+    .btn {
+      background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px;
+      transition: transform 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn.secondary {
+      background: linear-gradient(45deg, #4ecdc4, #44a08d);
+    }
+
+    .code {
+      background: #2a2a2a;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      text-align: left;
+      margin: 15px 0;
+      font-size: 14px;
+      overflow-x: auto;
+    }
+
+    .highlight {
+      background: rgba(255, 235, 59, 0.3);
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+        margin: 20px;
+      }
+      
+      h1 {
+        font-size: 2em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🐍 Snake Game Library</h1>
+    <p class="subtitle">Hidden easter egg ready to be discovered!</p>
+    
+    <div class="status">
+      ✅ Snake Game Library is active and listening for key sequences
+    </div>
+
+    <div class="demo-section">
+      <h3>🎮 Try These Secret Sequences:</h3>
+      
+      <div>
+        <strong>Konami Code (Default):</strong>
+        <div class="key-sequence">
+          <span class="key arrow-key">↑</span>
+          <span class="key arrow-key">↑</span>
+          <span class="key arrow-key">↓</span>
+          <span class="key arrow-key">↓</span>
+          <span class="key arrow-key">←</span>
+          <span class="key arrow-key">→</span>
+          <span class="key arrow-key">←</span>
+          <span class="key arrow-key">→</span>
+          <span class="key">B</span>
+          <span class="key">A</span>
+        </div>
+      </div>
+
+      <div>
+        <strong>Simple Snake:</strong>
+        <div class="key-sequence">
+          <span class="key">S</span>
+          <span class="key">N</span>
+          <span class="key">A</span>
+          <span class="key">K</span>
+          <span class="key">E</span>
+        </div>
+      </div>
+
+      <div>
+        <strong>Debug Mode:</strong>
+        <div class="key-sequence">
+          <span class="key">D</span>
+          <span class="key">E</span>
+          <span class="key">V</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>⚡ Manual Controls</h3>
+      <button class="btn" onclick="snakeEgg.openGame()">🎮 Open Game</button>
+      <button class="btn secondary" onclick="snakeEgg.closeGame()">✖️ Close Game</button>
+    </div>
+
+    <div class="demo-section">
+      <h3>📋 Integration Code</h3>
+      <div class="code">
+<span class="highlight">import</span> { SnakeGameEasterEgg } <span class="highlight">from</span> '@coledonprojects/snake-game';
+
+<span class="highlight">const</span> snakeEgg = <span class="highlight">new</span> SnakeGameEasterEgg({
+  onGameOpen: () => console.log('🐍 Game opened!'),
+  onHighScore: (score) => console.log(`High score: ${score}!`)
+});
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h3>🎯 Perfect For:</h3>
+      <p>• Developer portfolios • Corporate websites • Gaming platforms<br>
+      • Educational sites • 404 error pages • Employee dashboards</p>
+    </div>
+
+    <p style="margin-top: 30px; opacity: 0.7;">
+      <em>This demo shows the Snake Game Library in action. Try the key sequences above!</em>
+    </p>
+  </div>
+
+  <!-- Load the library (in real usage, this would be from node_modules) -->
+  <script type="module">
+    // In this demo, we'll simulate the library import
+    // In real usage: import { SnakeGameEasterEgg, SNAKE_SEQUENCE, DEBUG_SEQUENCE } from '@coledonprojects/snake-game';
+    
+    // For demo purposes, we'll create a simple implementation
+    class DemoSnakeGameEasterEgg {
+      constructor(config = {}) {
+        this.config = config;
+        this.setupKeySequences();
+        this.isGameOpen = false;
+      }
+
+      setupKeySequences() {
+        // Konami Code
+        this.setupSequence(['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA']);
+        
+        // SNAKE sequence
+        this.setupSequence(['KeyS', 'KeyN', 'KeyA', 'KeyK', 'KeyE']);
+        
+        // DEV sequence
+        this.setupSequence(['KeyD', 'KeyE', 'KeyV']);
+      }
+
+      setupSequence(keys) {
+        let currentIndex = 0;
+        let lastKeyTime = 0;
+        const timeWindow = 3000;
+
+        document.addEventListener('keydown', (e) => {
+          const now = Date.now();
+          
+          if (now - lastKeyTime > timeWindow) {
+            currentIndex = 0;
+          }
+
+          if (e.code === keys[currentIndex]) {
+            currentIndex++;
+            lastKeyTime = now;
+
+            if (currentIndex >= keys.length) {
+              this.openGame();
+              currentIndex = 0;
+            }
+          } else {
+            currentIndex = 0;
+          }
+        });
+      }
+
+      openGame() {
+        if (this.isGameOpen) return;
+        
+        this.showModal('🐍 Snake Game Activated!', 'Secret sequence detected! In a real implementation, the full Snake game would open here.');
+        this.isGameOpen = true;
+        
+        if (this.config.onGameOpen) {
+          this.config.onGameOpen();
+        }
+      }
+
+      closeGame() {
+        if (!this.isGameOpen) return;
+        
+        const modal = document.getElementById('demo-modal');
+        if (modal) {
+          modal.remove();
+        }
+        
+        this.isGameOpen = false;
+        
+        if (this.config.onGameClose) {
+          this.config.onGameClose();
+        }
+      }
+
+      showModal(title, message) {
+        // Remove existing modal
+        const existing = document.getElementById('demo-modal');
+        if (existing) existing.remove();
+
+        const modal = document.createElement('div');
+        modal.id = 'demo-modal';
+        modal.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.9);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: Arial, sans-serif;
+        `;
+
+        modal.innerHTML = `
+          <div style="
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            color: white;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+          ">
+            <h2 style="margin-bottom: 20px; font-size: 2em;">${title}</h2>
+            <p style="margin-bottom: 30px; font-size: 1.1em; line-height: 1.5;">${message}</p>
+            <button onclick="snakeEgg.closeGame()" style="
+              background: #ff6b6b;
+              color: white;
+              border: none;
+              padding: 12px 24px;
+              border-radius: 25px;
+              cursor: pointer;
+              font-size: 16px;
+            ">Close Demo</button>
+            <p style="margin-top: 20px; opacity: 0.8; font-size: 0.9em;">
+              Press ESC or click close to exit
+            </p>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Close on ESC
+        const escHandler = (e) => {
+          if (e.key === 'Escape') {
+            this.closeGame();
+            document.removeEventListener('keydown', escHandler);
+          }
+        };
+        document.addEventListener('keydown', escHandler);
+      }
+    }
+
+    // Create the demo instance
+    window.snakeEgg = new DemoSnakeGameEasterEgg({
+      onGameOpen: () => {
+        console.log('🐍 Demo: Snake game opened!');
+        document.title = '🐍 Snake Game Demo - Game Active!';
+      },
+      onGameClose: () => {
+        console.log('Demo: Snake game closed');
+        document.title = 'Snake Game Library Demo';
+      }
+    });
+
+    console.log('🎮 Snake Game Library Demo loaded! Try the key sequences shown above.');
+  </script>
+</body>
+</html> 
