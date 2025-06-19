@@ -19,8 +19,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@types/howler": "^2.2.12",
-    "howler": "^2.2.4",
     "pixi.js": "^7.4.0"
   },
   "devDependencies": {

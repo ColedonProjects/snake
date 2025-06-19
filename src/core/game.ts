@@ -1,20 +1,102 @@
-import { Application, Container } from 'pixi.js';
+import { Application, Container, Graphics, Text, TextStyle } from 'pixi.js';
 import { Snake } from './snake';
 import { Food } from './food';
 import { GameState } from '../types/game-state';
 import { InputManager } from './input-manager';
-import { OverlayUI } from '../../srcui/overlay';
 import { ParticleSystem } from '../../srcui/particle-system';
 import { PowerUp } from './power-up';
 import { ComboPopup } from '../../srcui/combo-popup';
 import { ThemeManager, Theme } from '../../srcui/theme-manager';
-import { ThemeToggleButton } from '../../srcui/theme-toggle';
 import { SkinManager, SnakeSkin } from '../../srcui/skin-manager';
-import { SkinToggleButton } from '../../srcui/skin-toggle';
-import { ObstacleManager } from './obstacle';
 import { AchievementSystem } from '../../srcui/achievement-system';
-import { SoundManager, SoundEffect } from '../audio/sound-manager';
-import { AudioDebugPanel } from '../../srcui/audio-debug';
+
+// External UI interface
+interface ExternalUI
+{
+  updateScore ( score: number ): void;
+  updateLevel ( level: number ): void;
+  updateTheme ( themeName: string ): void;
+  updateSkin ( skinName: string ): void;
+  updateAchievements ( achievements: string[] ): void;
+  updateGameStatus ( status: 'ready' | 'playing' | 'paused' | 'game-over' ): void;
+  unlockAchievement ( achievementName: string ): void;
+  gameCompleted ( finalScore: number ): void;
+}
+
+// Simple game over overlay for canvas
+class GameOverOverlay
+{
+  public container: Container;
+  private graphics!: Graphics;
+  private titleText!: Text;
+  private restartText!: Text;
+  private onRestart: ( () => void ) | null = null;
+
+  constructor ()
+  {
+    this.container = new Container();
+    this.container.visible = false;
+    this.createOverlay();
+  }
+
+  private createOverlay (): void
+  {
+    // Semi-transparent background
+    this.graphics = new Graphics();
+    this.graphics.beginFill( 0x000000, 0.8 );
+    this.graphics.drawRect( 0, 0, 800, 600 );
+    this.graphics.endFill();
+    this.container.addChild( this.graphics );
+
+    // Game Over text
+    const titleStyle = new TextStyle( {
+      fontFamily: 'Arial',
+      fontSize: 48,
+      fill: '#ff4444',
+      fontWeight: 'bold',
+    } );
+
+    this.titleText = new Text( 'GAME OVER', titleStyle );
+    this.titleText.anchor.set( 0.5 );
+    this.titleText.position.set( 400, 250 );
+    this.container.addChild( this.titleText );
+
+    // Restart instruction
+    const restartStyle = new TextStyle( {
+      fontFamily: 'Arial',
+      fontSize: 24,
+      fill: '#ffffff',
+    } );
+
+    this.restartText = new Text( 'Press SPACE to restart', restartStyle );
+    this.restartText.anchor.set( 0.5 );
+    this.restartText.position.set( 400, 320 );
+    this.container.addChild( this.restartText );
+  }
+
+  public show ( onRestart: () => void ): void
+  {
+    this.container.visible = true;
+    this.onRestart = onRestart;
+
+    // Listen for spacebar
+    const spaceHandler = ( event: KeyboardEvent ) =>
+    {
+      if ( event.code === 'Space' )
+      {
+        this.hide();
+        if ( this.onRestart ) this.onRestart();
+        window.removeEventListener( 'keydown', spaceHandler );
+      }
+    };
+    window.addEventListener( 'keydown', spaceHandler );
+  }
+
+  public hide (): void
+  {
+    this.container.visible = false;
+  }
+}
 
 export class Game
 {
@@ -25,8 +107,10 @@ export class Game
   private powerUp: PowerUp;
   private gameState: GameState;
   private isRunning: boolean = false;
+  private isPaused: boolean = false;
   private inputManager: InputManager;
-  private overlay: OverlayUI;
+  private externalUI: ExternalUI;
+  private gameOverOverlay: GameOverOverlay;
   private particles: ParticleSystem;
   private powerUpTimer: number = 0;
   private powerUpActive: boolean = false;
@@ -36,18 +120,14 @@ export class Game
   private comboCount: number = 0; // foods eaten in window
   private comboTimer: number = 0; // frames left in window
   private comboWindow: number = 1800; // 30 seconds at 60fps
-  private themeToggle: ThemeToggleButton;
-  private skinToggle: SkinToggleButton;
   private currentSkin: SnakeSkin;
-  private obstacles: ObstacleManager;
   private achievements: AchievementSystem;
-  private soundManager: SoundManager;
-  private audioDebug: AudioDebugPanel;
 
-  constructor ( app: Application )
+  constructor ( app: Application, externalUI: ExternalUI )
   {
     console.log( '[Game] Constructor starting...' );
     this.app = app;
+    this.externalUI = externalUI;
     this.gameContainer = new Container();
     this.app.stage.addChild( this.gameContainer );
 
@@ -69,11 +149,9 @@ export class Game
     this.gameContainer.addChild( this.food.container );
     this.gameContainer.addChild( this.powerUp.container );
 
-    // Overlay UI
-    this.overlay = new OverlayUI();
-    this.app.stage.addChild( this.overlay.container );
-    this.overlay.updateScore( this.gameState.score );
-    this.overlay.updateLevel( this.gameState.level );
+    // Game over overlay (minimal, only for game over state)
+    this.gameOverOverlay = new GameOverOverlay();
+    this.app.stage.addChild( this.gameOverOverlay.container );
 
     // Particle system
     this.particles = new ParticleSystem();
@@ -82,50 +160,55 @@ export class Game
     this.comboPopup = new ComboPopup();
     this.app.stage.addChild( this.comboPopup.container );
 
-    this.themeToggle = new ThemeToggleButton();
-    this.app.stage.addChild( this.themeToggle.container );
+    // Theme management
     ThemeManager.onThemeChange( theme => this.applyTheme( theme ) );
     window.addEventListener( 'keydown', e =>
     {
       if ( e.key.toLowerCase() === 't' )
       {
-        ThemeManager.nextTheme();
-        this.soundManager.play( SoundEffect.BUTTON_CLICK );
+        this.nextTheme();
       }
     } );
 
-    this.skinToggle = new SkinToggleButton();
-    this.app.stage.addChild( this.skinToggle.container );
+    // Skin management
     this.currentSkin = SkinManager.getSkin();
     this.snake.setColor( this.currentSkin.color );
     SkinManager.onSkinChange( skin =>
     {
       this.currentSkin = skin;
       this.snake.setColor( skin.color );
+      this.externalUI.updateSkin( skin.name );
     } );
     window.addEventListener( 'keydown', e =>
     {
       if ( e.key.toLowerCase() === 's' )
       {
-        SkinManager.nextSkin();
-        this.soundManager.play( SoundEffect.BUTTON_CLICK );
+        this.nextSkin();
       }
     } );
 
-    this.obstacles = new ObstacleManager();
-    this.app.stage.addChild( this.obstacles.container );
+    // Game controls
+    window.addEventListener( 'keydown', e =>
+    {
+      if ( e.code === 'Space' )
+      {
+        e.preventDefault();
+        this.togglePause();
+      }
+      else if ( e.code === 'Escape' )
+      {
+        e.preventDefault();
+        this.restart();
+      }
+    } );
 
     // Achievement system
     this.achievements = new AchievementSystem();
+    this.achievements.setOnAchievementUnlocked( ( achievementName ) =>
+    {
+      this.externalUI.unlockAchievement( achievementName );
+    } );
     this.app.stage.addChild( this.achievements.container );
-
-    // Sound system
-    this.soundManager = SoundManager.getInstance();
-    this.soundManager.playMusic();
-
-    // Audio debug panel (only in development)
-    this.audioDebug = new AudioDebugPanel();
-    this.app.stage.addChild( this.audioDebug.container );
 
     // Initialize input manager
     this.inputManager = InputManager.getInstance();
@@ -134,19 +217,51 @@ export class Game
     // Apply theme after all objects are created
     this.applyTheme( ThemeManager.getTheme() );
 
+    // Initialize external UI
+    this.externalUI.updateTheme( ThemeManager.getTheme().name );
+    this.externalUI.updateSkin( this.currentSkin.name );
+    this.externalUI.updateGameStatus( 'ready' );
+
     // Set up game loop
     this.app.ticker.add( this.update.bind( this ) );
     console.log( '[Game] Constructor complete, ticker added' );
+  }
+
+  public nextTheme (): void
+  {
+    ThemeManager.nextTheme();
+    this.externalUI.updateTheme( ThemeManager.getTheme().name );
+  }
+
+  public nextSkin (): void
+  {
+    SkinManager.nextSkin();
+  }
+
+  public togglePause (): void
+  {
+    if ( !this.isRunning || this.gameState.isGameOver ) return;
+
+    this.isPaused = !this.isPaused;
+    this.externalUI.updateGameStatus( this.isPaused ? 'paused' : 'playing' );
+    console.log( `[Game] ${ this.isPaused ? 'Paused' : 'Resumed' }` );
+  }
+
+  public restart (): void
+  {
+    if ( this.isRunning || this.gameState.isGameOver )
+    {
+      this.start();
+    }
   }
 
   public start (): void
   {
     console.log( '[Game] Start called' );
 
-    // Trigger custom event to help audio initialization
-    window.dispatchEvent( new CustomEvent( 'gamestart' ) );
-
+    // Game initialization
     this.isRunning = true;
+    this.isPaused = false;
     this.gameState.isGameOver = false;
     this.gameState.score = 0;
     this.gameState.level = 1;
@@ -160,27 +275,20 @@ export class Game
     // Reset game objects
     this.snake.reset();
     this.food.reset( this.snake.getBody() );
-    this.overlay.hideGameOver();
-    this.overlay.updateScore( this.gameState.score );
-    this.overlay.updateLevel( this.gameState.level );
+    this.gameOverOverlay.hide();
 
-    this.obstacles.reset();
-    this.spawnObstacles();
+    // Update external UI
+    this.externalUI.updateScore( this.gameState.score );
+    this.externalUI.updateLevel( this.gameState.level );
+    this.externalUI.updateGameStatus( 'playing' );
+
     this.achievements.resetGameSession();
     console.log( '[Game] Start complete, isRunning:', this.isRunning );
   }
 
-  private spawnObstacles ()
-  {
-    // Number of obstacles increases with level
-    const count = Math.min( 2 + this.gameState.level, 20 );
-    this.obstacles.spawn( count, this.snake.getBody(), this.food.position, this.powerUp.position );
-  }
-
   private update ( delta: number ): void
   {
-    // console.log( '[Game] Update called, isRunning:', this.isRunning, 'isGameOver:', this.gameState.isGameOver );
-    if ( !this.isRunning || this.gameState.isGameOver ) return;
+    if ( !this.isRunning || this.gameState.isGameOver || this.isPaused ) return;
 
     // Only allow one direction change per movement step
     const nextDir = this.inputManager.getAndConsumeNextDirection();
@@ -193,15 +301,9 @@ export class Game
     }
 
     // Update game objects
-    const oldLength = this.snake.getBody().length;
     this.snake.update( delta * this.gameState.speed );
     this.inputManager.setCurrentDirection( this.snake.getDirection() );
 
-    // Play movement sound occasionally (every 10 frames at normal speed)
-    if ( Math.random() < 0.02 )
-    {
-      this.soundManager.play( SoundEffect.MOVE );
-    }
     this.food.update( delta );
     this.powerUp.update( delta );
     this.particles.update();
@@ -220,14 +322,12 @@ export class Game
       }
     }
 
-    // Check for collisions
+    // Check for game ending conditions
     this.checkCollisions();
 
-    // Update score display
-    this.overlay.updateScore( this.gameState.score );
-    this.overlay.updateLevel( this.gameState.level );
-
-    this.achievements.update();
+    // Update external UI
+    this.externalUI.updateScore( this.gameState.score );
+    this.externalUI.updateLevel( this.gameState.level );
     this.achievements.updateSurvivalTime();
   }
 
@@ -237,7 +337,6 @@ export class Game
     if ( this.snake.checkFoodCollision( this.food.position ) )
     {
       this.snake.grow();
-      this.soundManager.play( SoundEffect.EAT );
 
       // Combo logic: foods eaten in 30s window
       if ( this.comboTimer > 0 )
@@ -256,7 +355,6 @@ export class Game
         this.comboPopup.show( `${ this.comboCount } foods in 30s! +${ bonus }` );
         this.particles.burstAt( this.food.position.x, this.food.position.y, this.currentSkin.particle, 48 );
         this.achievements.updateComboCount();
-        this.soundManager.play( SoundEffect.COMBO );
       }
       // Particle burst at food
       this.particles.burstAt( this.food.position.x, this.food.position.y, this.currentSkin.particle );
@@ -275,29 +373,10 @@ export class Game
       this.gameState.speed = 2 + ( this.gameState.level - 1 ) * 0.2; // speed boost
       this.particles.burstAt( this.powerUp.position.x, this.powerUp.position.y, 0x66ccff );
       this.achievements.updatePowerUpCount();
-      this.soundManager.play( SoundEffect.POWER_UP );
     }
 
-    // Check obstacle collision
-    const head = this.snake.getBody()[ 0 ];
-    for ( const obs of this.obstacles.getObstacles() )
-    {
-      if ( head.x === obs.x && head.y === obs.y )
-      {
-        this.gameOver();
-        return;
-      }
-    }
-
-    // Check snake-wall collision
-    if ( this.snake.checkWallCollision() )
-    {
-      this.achievements.onWallHit();
-      this.gameOver();
-    }
-
-    // Check snake-self collision
-    if ( this.snake.checkSelfCollision() )
+    // Check wall and self collisions
+    if ( this.snake.checkWallCollision() || this.snake.checkSelfCollision() )
     {
       this.gameOver();
     }
@@ -305,26 +384,34 @@ export class Game
 
   private checkLevelUp (): void
   {
-    if ( this.gameState.score >= this.gameState.level * 100 )
+    const newLevel = Math.floor( this.gameState.score / 100 ) + 1;
+    if ( newLevel > this.gameState.level )
     {
-      this.gameState.level++;
-      this.gameState.speed += 0.2;
-      this.spawnObstacles();
-      this.soundManager.play( SoundEffect.LEVEL_UP );
+      this.gameState.level = newLevel;
+      this.gameState.speed = 1 + ( this.gameState.level - 1 ) * 0.2;
+      this.externalUI.updateLevel( this.gameState.level );
+      this.achievements.updateLevel( this.gameState.level );
+      console.log( `[Game] Level up! New level: ${ this.gameState.level }, speed: ${ this.gameState.speed }` );
     }
   }
 
   private gameOver (): void
   {
-    this.gameState.isGameOver = true;
+    console.log( '[Game] Game over!' );
+    const finalScore = this.gameState.score;
+
     this.isRunning = false;
-    this.soundManager.play( SoundEffect.GAME_OVER );
-    // Particle burst at snake head
-    const head = this.snake.getBody()[ 0 ];
-    this.particles.burstAt( head.x, head.y, 0xff4444 );
-    this.overlay.showGameOver( () =>
+    this.isPaused = false;
+    this.gameState.isGameOver = true;
+    this.externalUI.updateGameStatus( 'game-over' );
+
+    // Record the completed game
+    this.externalUI.gameCompleted( finalScore );
+
+    this.particles.burstAt( this.snake.getBody()[ 0 ].x, this.snake.getBody()[ 0 ].y, 0xff0000, 36 );
+
+    this.gameOverOverlay.show( () =>
     {
-      this.soundManager.play( SoundEffect.BUTTON_CLICK );
       this.start();
     } );
   }
@@ -333,8 +420,5 @@ export class Game
   {
     // Set background
     this.app.renderer.background.color = theme.background;
-    // TODO: update snake, food, power-up, particles, UI colors
-    // This requires updating those classes to accept theme colors
-    this.obstacles.setColor( theme.food );
   }
 } 

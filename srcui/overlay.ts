@@ -1,5 +1,5 @@
 import { Container, Text, TextStyle, Graphics } from 'pixi.js';
-import { SoundManager, SoundEffect } from '../src/audio/sound-manager';
+// Sound system removed
 
 export class OverlayUI
 {
@@ -8,7 +8,6 @@ export class OverlayUI
   private levelText: Text;
   private gameOverText: Text;
   private restartButton: Graphics;
-  private audioTestButton: Graphics;
   private onRestart: ( () => void ) | null = null;
 
   constructor ()
@@ -31,31 +30,6 @@ export class OverlayUI
     this.levelText.position.set( 650, 10 );
     this.container.addChild( this.levelText );
 
-    // Audio test button
-    this.audioTestButton = new Graphics();
-    this.audioTestButton.beginFill( 0x44aa44 );
-    this.audioTestButton.drawRoundedRect( 0, 0, 120, 40, 8 );
-    this.audioTestButton.endFill();
-    this.audioTestButton.position.set( 20, 60 );
-    this.audioTestButton.interactive = true;
-    this.container.addChild( this.audioTestButton );
-
-    const audioTestText = new Text( 'Test Audio', {
-      ...style,
-      fontSize: 18,
-      fill: '#fff',
-    } );
-    audioTestText.anchor.set( 0.5 );
-    audioTestText.position.set( 60, 20 );
-    this.audioTestButton.addChild( audioTestText );
-
-    this.audioTestButton.on( 'pointertap', () =>
-    {
-      console.log( '[OverlayUI] Audio test button clicked' );
-      const soundManager = SoundManager.getInstance();
-      soundManager.play( SoundEffect.EAT );
-    } );
-
     this.gameOverText = new Text( 'GAME OVER', {
       ...style,
       fontSize: 48,
@@ -68,48 +42,54 @@ export class OverlayUI
     this.container.addChild( this.gameOverText );
 
     this.restartButton = new Graphics();
-    this.restartButton.beginFill( 0x2222ff );
-    this.restartButton.drawRoundedRect( 0, 0, 180, 50, 12 );
+    this.restartButton.beginFill( 0x4444ff );
+    this.restartButton.drawRoundedRect( 0, 0, 200, 60, 8 );
     this.restartButton.endFill();
-    this.restartButton.position.set( 310, 320 );
+    this.restartButton.position.set( 300, 320 );
     this.restartButton.interactive = true;
     this.restartButton.visible = false;
     this.container.addChild( this.restartButton );
 
-    const restartText = new Text( 'Restart', {
+    const restartText = new Text( 'Click to Restart', {
       ...style,
-      fontSize: 28,
+      fontSize: 24,
       fill: '#fff',
     } );
     restartText.anchor.set( 0.5 );
-    restartText.position.set( 90, 25 );
+    restartText.position.set( 100, 30 );
     this.restartButton.addChild( restartText );
 
     this.restartButton.on( 'pointertap', () =>
     {
-      if ( this.onRestart ) this.onRestart();
+      console.log( '[OverlayUI] Restart button clicked' );
+      if ( this.onRestart )
+      {
+        this.onRestart();
+      }
     } );
   }
 
-  public updateScore ( score: number )
+  public updateScore ( score: number ): void
   {
     this.scoreText.text = `Score: ${ score }`;
   }
 
-  public updateLevel ( level: number )
+  public updateLevel ( level: number ): void
   {
     this.levelText.text = `Level: ${ level }`;
   }
 
-  public showGameOver ( onRestart: () => void )
+  public showGameOver ( onRestart: () => void ): void
   {
+    console.log( '[OverlayUI] Showing game over screen' );
     this.gameOverText.visible = true;
     this.restartButton.visible = true;
     this.onRestart = onRestart;
   }
 
-  public hideGameOver ()
+  public hideGameOver (): void
   {
+    console.log( '[OverlayUI] Hiding game over screen' );
     this.gameOverText.visible = false;
     this.restartButton.visible = false;
     this.onRestart = null;
