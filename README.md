@@ -15,7 +15,7 @@ Run as a complete standalone game application.
 ## 📦 Installation (Library Mode)
 
 ```bash
-npm install @coledonprojects/snake-game
+npm install coledon-snake-game
 ```
 
 ## 🚀 Quick Start (Library Mode)
@@ -23,7 +23,7 @@ npm install @coledonprojects/snake-game
 ### Basic Setup (Konami Code)
 
 ```typescript
-import { SnakeGameEasterEgg } from '@coledonprojects/snake-game';
+import { SnakeGameEasterEgg } from 'coledon-snake-game';
 
 // Initialize with default Konami Code sequence
 const snakeEgg = new SnakeGameEasterEgg();
@@ -35,7 +35,7 @@ const snakeEgg = new SnakeGameEasterEgg();
 ### Custom Key Sequence
 
 ```typescript
-import { SnakeGameEasterEgg, SNAKE_SEQUENCE } from '@coledonprojects/snake-game';
+import { SnakeGameEasterEgg, SNAKE_SEQUENCE } from 'coledon-snake-game';
 
 const snakeEgg = new SnakeGameEasterEgg({
   keySequence: SNAKE_SEQUENCE, // S-N-A-K-E
@@ -47,7 +47,7 @@ const snakeEgg = new SnakeGameEasterEgg({
 ### Advanced Configuration
 
 ```typescript
-import { SnakeGameEasterEgg } from '@coledonprojects/snake-game';
+import { SnakeGameEasterEgg } from 'coledon-snake-game';
 
 const snakeEgg = new SnakeGameEasterEgg({
   // Custom container (default: document.body)
@@ -93,7 +93,7 @@ snakeEgg.destroy();   // Clean up when done
 ## 🎯 Predefined Key Sequences
 
 ```typescript
-import { KONAMI_CODE, SNAKE_SEQUENCE, DEBUG_SEQUENCE } from '@coledonprojects/snake-game';
+import { KONAMI_CODE, SNAKE_SEQUENCE, DEBUG_SEQUENCE } from 'coledon-snake-game';
 
 // Konami Code: ↑ ↑ ↓ ↓ ← → ← → B A
 KONAMI_CODE
@@ -111,7 +111,7 @@ DEBUG_SEQUENCE
 
 ```tsx
 import React, { useEffect, useRef } from 'react';
-import { SnakeGameEasterEgg } from '@coledonprojects/snake-game';
+import { SnakeGameEasterEgg } from 'coledon-snake-game';
 
 function App() {
   const snakeEggRef = useRef<SnakeGameEasterEgg>();
@@ -148,7 +148,7 @@ function App() {
 </template>
 
 <script>
-import { SnakeGameEasterEgg, SNAKE_SEQUENCE } from '@coledonprojects/snake-game';
+import { SnakeGameEasterEgg, SNAKE_SEQUENCE } from 'coledon-snake-game';
 
 export default {
   mounted() {
@@ -179,7 +179,7 @@ export default {
   <p>Hidden surprise for curious users... 🤫</p>
   
   <script type="module">
-    import { SnakeGameEasterEgg } from '@coledonprojects/snake-game';
+    import { SnakeGameEasterEgg } from 'coledon-snake-game';
     
     new SnakeGameEasterEgg({
       showInstructions: true,

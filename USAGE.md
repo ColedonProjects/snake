@@ -3,13 +3,13 @@
 ## Installation
 
 ```bash
-npm install @coledonprojects/snake-game
+npm install coledon-snake-game
 ```
 
 ## Basic Setup (30 seconds)
 
 ```typescript
-import { SnakeGameEasterEgg } from '@coledonprojects/snake-game';
+import { SnakeGameEasterEgg } from 'coledon-snake-game';
 
 // That's it! Users can now activate with Konami Code:
 // ↑ ↑ ↓ ↓ ← → ← → B A
@@ -19,7 +19,7 @@ new SnakeGameEasterEgg();
 ## Custom Key Sequence
 
 ```typescript
-import { SnakeGameEasterEgg, SNAKE_SEQUENCE } from '@coledonprojects/snake-game';
+import { SnakeGameEasterEgg, SNAKE_SEQUENCE } from 'coledon-snake-game';
 
 new SnakeGameEasterEgg({
   keySequence: SNAKE_SEQUENCE // S-N-A-K-E
@@ -30,7 +30,7 @@ new SnakeGameEasterEgg({
 
 ```tsx
 import { useEffect } from 'react';
-import { SnakeGameEasterEgg } from '@coledonprojects/snake-game';
+import { SnakeGameEasterEgg } from 'coledon-snake-game';
 
 function App() {
   useEffect(() => {

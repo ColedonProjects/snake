@@ -1,5 +1,5 @@
 {
-  "name": "@coledonprojects/snake-game",
+  "name": "coledon-snake-game",
   "version": "1.0.0",
   "description": "A modern Snake game library that can be embedded in any web application with a secret key sequence easter egg",
   "type": "module",
@@ -40,7 +40,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ColedonProjects/snake.git"
+    "url": "git+https://github.com/ColedonProjects/snake.git"
   },
   "homepage": "https://github.com/ColedonProjects/snake#readme",
   "bugs": {
