@@ -1,6 +1,6 @@
 {
   "name": "coledon-snake-game",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A modern Snake game library that can be embedded in any web application with a secret key sequence easter egg",
   "type": "module",
   "main": "dist/index.js",
