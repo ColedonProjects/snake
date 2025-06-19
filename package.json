@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "A modern Snake game library that can be embedded in any web application with a secret key sequence easter egg",
   "type": "module",
+  "repository":"https://github.com/ColedonProjects/snake",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
